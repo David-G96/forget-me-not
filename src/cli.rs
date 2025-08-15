@@ -1,34 +1,42 @@
 use clap::Parser;
-use std::process::Command;
 
-#[derive(Parser)]
+#[derive(Debug, Parser)]
 #[command(name = "forget-me-not", about = "一個跨包管理器工具")]
-struct Cli {
-    #[arg(short, long, help = "設定日誌等級")]
-    log_level: Option<String>,
+pub struct Cli {
+    #[command(subcommand)]
+    pub command: Commands,
+}
 
-    #[arg(help = "要使用的包管理器名稱，例如：apt, flatpak, dnf")]
-    manager_name: String,
-
-    #[arg(help = "傳遞給包管理器的命令和引數")]
-    command_args: Vec<String>,
+#[derive(Debug, clap::Subcommand)]
+pub enum Commands {
+    /// 執行命令並記錄
+    Run {
+        manager: String,
+        #[arg(trailing_var_arg = true)]
+        args: Vec<String>,
+    },
+    /// 僅記錄命令，不實際執行
+    Track {
+        manager: String,
+        #[arg(trailing_var_arg = true)]
+        args: Vec<String>,
+    },
 }
 
 #[cfg(test)]
 mod test {
-    use super::*;
+    use std::process::Command;
+    use std::vec;
 
     #[test]
     fn test() {
-        let cli = Cli::parse();
-
-        println!("我的日誌等級是：{:?}", cli.log_level);
+        //let cli = Cli::parse();
 
         // 獲取包管理器名稱
-        let manager = &cli.manager_name;
+        let manager = "apt";
 
         // 獲取所有要傳遞給包管理器的引數
-        let args = &cli.command_args;
+        let args = vec!["list"];
 
         // 檢查包管理器是否存在
         // 這是為了保險，建議先用 which::which(manager) 檢查一下
@@ -43,7 +51,6 @@ mod test {
             .args(args)
             .output()
             .expect("無法執行命令");
-
         if output.status.success() {
             println!("命令成功！\n{}", String::from_utf8_lossy(&output.stdout));
         } else {
