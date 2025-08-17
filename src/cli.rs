@@ -1,23 +1,36 @@
 use clap::Parser;
 
 #[derive(Debug, Parser)]
-#[command(name = "forget-me-not", about = "一個跨包管理器工具")]
+#[command(
+    name = "forget-me-not",
+    about = "a cross-platform/package manager tracker"
+)]
 pub struct Cli {
     #[command(subcommand)]
     pub command: Commands,
 }
 
+#[non_exhaustive]
 #[derive(Debug, clap::Subcommand)]
 pub enum Commands {
-    /// 執行命令並記錄
+    /// run command and track
     Run {
         manager: String,
         #[arg(trailing_var_arg = true)]
         args: Vec<String>,
     },
-    /// 僅記錄命令，不實際執行
+    /// track only
     Track {
         manager: String,
+        package: String,
+        version: String,
+        install_time: String,
+        #[arg(trailing_var_arg = true)]
+        args: Vec<String>,
+    },
+    /// list all tracked package
+    List {
+        manager: Option<String>,
         #[arg(trailing_var_arg = true)]
         args: Vec<String>,
     },

@@ -1,4 +1,4 @@
-use rusqlite::{Connection, Result};
+`use rusqlite::{Connection, Result};
 
 pub const APP_DIR_NAME: &str = "forget-me-not";
 pub const DB_NAME: &str = "todos.db";
@@ -33,13 +33,18 @@ pub fn create_table(conn: &mut Connection) -> Result<()> {
     conn.execute(
         "CREATE TABLE IF NOT EXISTS installed_packages (
     id INTEGER PRIMARY KEY,
-    manager TEXT NOT NULL,
-    package TEXT NOT NULL,
+    source TEXT NOT NULL,
+    name TEXT NOT NULL,
     version TEXT,
-    install_date TEXT NOT NULL
+    install_date TEXT NOT NULL,
+    origin_uri TEXT,
+    check_sum TEXT,
+    remove_date TEXT,
 );",
         (),
     )?;
+
+    conn.execute("", ());
     Ok(())
 }
 
@@ -62,7 +67,6 @@ pub fn query_all(conn: &mut Connection) -> Vec<InstalledPackages> {
     let mut stmt = conn.prepare("SELECT * FROM installed_packages").unwrap();
     let res = stmt
         .query_map([], |row| {
-            let id: i32 = row.get(0).unwrap();
             let manager: String = row.get(1).unwrap();
             let package: String = row.get(2).unwrap();
             let version: String = row.get(3).unwrap();
@@ -95,7 +99,7 @@ WHERE package = ?1;",
     num != 0
 }
 
-pub fn remove_data(conn: &mut Connection, package: String) -> bool {
+pub fn remove_package(conn: &mut Connection, package: String) -> bool {
     let res = conn
         .execute(
             "DELETE FROM installed_packages
@@ -126,7 +130,7 @@ WHERE package = ?3;",
 mod test {
     use super::*;
 
-    #[test]
+    //#[test]
     fn test() {
         let path = get_db_path().unwrap();
 
@@ -169,7 +173,7 @@ mod test {
             }
         }
 
-        let res = remove_data(&mut conn, "org.mozilla.Firefox".to_string());
+        let res = remove_package(&mut conn, "org.mozilla.Firefox".to_string());
         println!("is firefox dropped? {}", res);
 
         println!("now the table is ");

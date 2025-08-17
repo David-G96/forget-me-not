@@ -1,0 +1,22 @@
+# special placeholders
+# placeholders are strings which are replaced at run time
+# placeholders are wrapped between `{` and `}`
+# note that if no placeholders is used, package name will be simply appended after the normal form
+# here are some usable placeholders:
+# args: arguments to be transferred to package managers
+# package: package name
+# version: package version
+
+[manager.apt]
+install = ["install"]
+upgrade = { template = "upgrade", pre_args = ["-y"] }
+remove = ["remove"]
+
+[manager.flatpak]
+install = { template = "install {package_name}", pre_args = [
+    "--user",
+], post_args = [
+    "--assumeyes",
+] }
+upgrade = "update"
+remove = "remove"
