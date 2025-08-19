@@ -1,15 +1,15 @@
-use std::{
-    collections::HashMap,
-    fs::{self, File},
-    io::Read,
-    path::PathBuf,
-};
+use std::{collections::HashMap, io::Read};
 
-use anyhow::{Ok, Result, anyhow, bail};
-use dirs::{config_dir, data_dir};
+use anyhow::{Ok, Result, anyhow};
+use chrono::Utc;
+use log::info;
 use rusqlite::Connection;
 
-use crate::{cli::Cli, config::PackageManagerConfig, models, path};
+use crate::{
+    config::PackageManagerConfig,
+    models::{self, Package},
+    path,
+};
 
 #[derive(Debug)]
 pub struct Program {
@@ -19,34 +19,13 @@ pub struct Program {
 
 impl Program {
     pub fn init() -> Result<Self> {
-        let mut data_path = data_dir().ok_or(anyhow!("cannot find data dir"))?;
-        let db_path = {
-            data_path.push("forget-me-not");
-            if let Err(e) = std::fs::create_dir_all(&data_path) {
-                bail!("{}", e);
-            }
-
-            data_path.push("data.db");
-            data_path
-        };
+        let db_path = path::get_db_path()?;
         let db_conn =
             Connection::open(&db_path).map_err(|e| anyhow!("failed to open database: {}", e))?;
-        models::init(&db_conn)?;
+        models::init_db(&db_conn)?;
 
-        let mut config_path = config_dir().ok_or(anyhow!("cannot find config dir"))?;
-        config_path.push("config.toml");
-        let mut config_file = fs::OpenOptions::new()
-            .write(true)
-            .create_new(true)
-            .open(&config_path);
-
-        let mut config_file = match config_file {
-            Result::Ok(file) => file,
-            Err(e) if e.kind() == std::io::ErrorKind::AlreadyExists => File::open(config_path)?,
-            _ => {
-                bail!("cannot open or create config file")
-            }
-        };
+        let config_path = path::get_config_path()?;
+        let mut config_file = path::open_or_create_file(&config_path)?;
 
         let mut buf = String::new();
         config_file
@@ -54,6 +33,7 @@ impl Program {
             .map_err(|e| anyhow!("failed to read config file: {}", e))?;
         drop(config_file); // Explicitly close file handle early
 
+        // 会panic
         let config: HashMap<String, PackageManagerConfig> =
             toml::from_str(&buf).map_err(|e| anyhow!("failed to parse config: {}", e))?;
 
@@ -65,9 +45,22 @@ impl Program {
         manager: String,
         package: String,
         version: String,
-        install_time: String,
+        time_stamp: chrono::DateTime<Utc>,
+        description: Option<String>,
     ) -> Result<()> {
+        let id = models::insert_package(
+            &mut self.db_conn,
+            &package,
+            &manager,
+            description.as_deref(),
+        )?;
+        let version_id = models::insert_package_version(&mut self.db_conn, id, &version)?;
+        models::insert_installation(&mut self.db_conn, version_id, "install", time_stamp)?;
         Ok(())
+    }
+
+    pub fn list_all(&self) -> anyhow::Result<Vec<Package>> {
+        models::get_all_packages(&self.db_conn)
     }
 }
 
@@ -78,11 +71,11 @@ mod test {
     #[test]
     fn test_db_init() {
         let program = Program::init();
-        print!("{:#?}", program);
-        // let packages: Vec<models::Package> = models::get_all_packages(&program.db_conn).unwrap();
+        let packages: Vec<models::Package> =
+            models::get_all_packages(&program.unwrap().db_conn).unwrap();
 
-        //for pkg in packages {
-        //  println!("{:#?}", pkg);
-        //}
+        for pkg in packages {
+            println!("{:#?}", pkg);
+        }
     }
 }

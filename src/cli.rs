@@ -1,4 +1,7 @@
 use clap::Parser;
+use log::info;
+
+use crate::models::Package;
 
 #[derive(Debug, Parser)]
 #[command(
@@ -21,19 +24,39 @@ pub enum Commands {
     },
     /// track only
     Track {
-        manager: String,
+        /// source name
+        source: String,
+        /// package name
         package: String,
+        /// sematic version
         version: String,
-        install_time: String,
+        /// install time in UTC, current time as default
+        install_time: Option<String>,
+        /// simple description, none as default
+        description: Option<String>,
+        /// extra args
         #[arg(trailing_var_arg = true)]
         args: Vec<String>,
     },
     /// list all tracked package
     List {
+        /// package manager
         manager: Option<String>,
+        /// package name
+        package: Option<String>,
         #[arg(trailing_var_arg = true)]
         args: Vec<String>,
     },
+}
+
+pub fn print_packages<'a, T>(packages: T)
+where
+    T: Iterator<Item = &'a Package>,
+{
+    info!("printing packages");
+    for pkg in packages {
+        println!("{:#?}", pkg);
+    }
 }
 
 #[cfg(test)]
@@ -43,8 +66,6 @@ mod test {
 
     #[test]
     fn test() {
-        //let cli = Cli::parse();
-
         // 獲取包管理器名稱
         let manager = "apt";
 
