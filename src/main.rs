@@ -3,16 +3,21 @@ use std::{env, process::ExitCode, time::Instant};
 use chrono::Utc;
 use clap::Parser;
 
-use crate::{cli::Cli, models::get_all_package_data, program::Program};
+use crate::{cli::Cli, _models::get_all_package_data, program::Program};
 
 mod cli;
 mod config;
-mod models;
+mod _models;
 mod path;
 mod program;
+mod database;
 
 fn main() -> ExitCode {
-    tracing_subscriber::fmt::init();
+    let cli = Cli::parse();
+    ExitCode::SUCCESS
+}
+
+fn _main() -> ExitCode {
     let start = Instant::now();
     let cli = Cli::parse();
     let mut program = Program::init().unwrap();

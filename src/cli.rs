@@ -1,7 +1,7 @@
 use clap::Parser;
 use log::info;
 
-use crate::models::Package;
+use crate::_models::Package;
 
 #[derive(Debug, Parser)]
 #[command(
@@ -18,7 +18,9 @@ pub struct Cli {
 pub enum Commands {
     /// run command and track
     Run {
+        /// source name
         manager: String,
+        /// args
         #[arg(trailing_var_arg = true)]
         args: Vec<String>,
     },
@@ -44,6 +46,7 @@ pub enum Commands {
         manager: Option<String>,
         /// package name
         package: Option<String>,
+        /// extra args
         #[arg(trailing_var_arg = true)]
         args: Vec<String>,
     },

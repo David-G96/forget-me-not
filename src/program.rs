@@ -2,12 +2,11 @@ use std::{collections::HashMap, io::Read};
 
 use anyhow::{Ok, Result, anyhow};
 use chrono::Utc;
-use log::info;
 use rusqlite::Connection;
 
 use crate::{
     config::PackageManagerConfig,
-    models::{self, Package},
+    _models::{self, Package},
     path,
 };
 
@@ -22,7 +21,7 @@ impl Program {
         let db_path = path::get_db_path()?;
         let db_conn =
             Connection::open(&db_path).map_err(|e| anyhow!("failed to open database: {}", e))?;
-        models::init_db(&db_conn)?;
+        _models::init_db(&db_conn)?;
 
         let config_path = path::get_config_path()?;
         let mut config_file = path::open_or_create_file(&config_path)?;
@@ -48,19 +47,19 @@ impl Program {
         time_stamp: chrono::DateTime<Utc>,
         description: Option<String>,
     ) -> Result<()> {
-        let id = models::insert_package(
+        let id = _models::insert_package(
             &mut self.db_conn,
             &package,
             &manager,
             description.as_deref(),
         )?;
-        let version_id = models::insert_package_version(&mut self.db_conn, id, &version)?;
-        models::insert_installation(&mut self.db_conn, version_id, "install", time_stamp)?;
+        let version_id = _models::insert_package_version(&mut self.db_conn, id, &version)?;
+        _models::insert_installation(&mut self.db_conn, version_id, "install", time_stamp)?;
         Ok(())
     }
 
     pub fn list_all(&self) -> anyhow::Result<Vec<Package>> {
-        models::get_all_packages(&self.db_conn)
+        _models::get_all_packages(&self.db_conn)
     }
 }
 
@@ -71,8 +70,8 @@ mod test {
     #[test]
     fn test_db_init() {
         let program = Program::init();
-        let packages: Vec<models::Package> =
-            models::get_all_packages(&program.unwrap().db_conn).unwrap();
+        let packages: Vec<_models::Package> =
+            _models::get_all_packages(&program.unwrap().db_conn).unwrap();
 
         for pkg in packages {
             println!("{:#?}", pkg);

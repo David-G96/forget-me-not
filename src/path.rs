@@ -3,22 +3,27 @@ use std::{
     path::{Path, PathBuf},
 };
 
-use anyhow::{Ok, Result, anyhow, bail};
+use anyhow::{Context, Ok, Result, anyhow, bail};
 pub const APP_DIR_NAME: &str = "forget-me-not";
-pub const DB_NAME: &str = "todos.db";
+pub const DB_NAME: &str = "data.db";
 
-pub fn get_db_path() -> Result<std::path::PathBuf> {
-    let mut path = dirs::data_dir().ok_or(anyhow!("cannot locate data dir"))?;
+/// get the supposed db file path on this computer
+pub fn get_db_path() -> Result<PathBuf> {
+    let mut path = dirs::data_dir().ok_or(anyhow!("Cannot locate system data directory"))?;
     path.push(APP_DIR_NAME);
-    create_dir_all(&path)?;
+    create_dir_all(&path)
+        .with_context(|| format!("Failed to create app directory at {:?}", path))?;
     path.push(DB_NAME);
     Ok(path)
 }
 
+/// get the supposed config file path on this computer,
+/// will not create the config file
 pub fn get_config_path() -> Result<PathBuf> {
-    let mut path = dirs::data_dir().ok_or(anyhow!("cannot locate data dir"))?;
+    let mut path = dirs::data_dir().ok_or(anyhow!("Cannot locate system data directory"))?;
     path.push(APP_DIR_NAME);
-    create_dir_all(&path)?;
+    create_dir_all(&path)
+        .with_context(|| format!("Failed to create app directory at {:?}", path))?;
     path.push("config.toml");
     Ok(path)
 }
@@ -33,7 +38,7 @@ pub fn open_or_create_file(path: &Path) -> Result<File> {
         Result::Ok(file) => file,
         Err(e) if e.kind() == std::io::ErrorKind::AlreadyExists => File::open(path)?,
         _ => {
-            bail!("cannot open or create file: {}", path.display())
+            bail!("Cannot open or create file: {}", path.display())
         }
     };
     Ok(file)
