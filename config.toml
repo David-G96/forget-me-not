@@ -8,15 +8,12 @@
 # version: package version
 
 [manager.apt]
-install = ["install"]
-upgrade = { template = "upgrade", pre_args = ["-y"] }
-remove = ["remove"]
+install = "install"
+upgrade = { template = "upgrade -y" }
+remove = "remove"
 
 [manager.flatpak]
-install = { template = "install {package_name}", pre_args = [
-    "--user",
-], post_args = [
-    "--assumeyes",
-] }
+install = { template = "install --user {package_name} --assumeyes" }
 upgrade = "update"
 remove = "remove"
+
