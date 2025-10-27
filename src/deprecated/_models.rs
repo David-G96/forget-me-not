@@ -25,7 +25,6 @@ pub struct PackageVersion {
 }
 
 #[derive(Debug)]
-
 pub struct Installation {
     pub installation_id: i64,
     pub version_id: i64,

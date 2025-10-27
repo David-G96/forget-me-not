@@ -11,6 +11,7 @@ mod _models;
 mod path;
 mod program;
 mod database;
+mod simpledata;
 
 fn main() -> ExitCode {
     let cli = Cli::parse();
