@@ -63,6 +63,8 @@ pub fn try_list_all(conn: &mut Connection) -> Result<Vec<SimplePackageData>, Str
 }
 
 /// try to insert one package data
+/// # Note
+/// ignores the id of the package
 pub fn try_insert(
     conn: &mut Connection,
     simple_package: SimplePackageData,

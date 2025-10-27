@@ -8,14 +8,14 @@ use rusqlite::Connection;
 const APP_QUALIFIER: &str = "YourOrgName";
 const APP_NAME: &str = "ForgetMeNot";
 const CONFIG_FILE_NAME: &str = "config.toml";
-const DATABASE_FILE_NAME: &str = "user_data.db";
+const DATABASE_FILE_NAME: &str = "package_data.db";
 
 pub fn get_app_data_local_dir() -> Result<PathBuf, String> {
     if let Some(mut data_dir) = dirs::data_local_dir() {
         data_dir.push(APP_NAME);
         return Ok(data_dir);
     }
-    return Err("cannot find data local dir!".to_string());
+    Err("cannot find data local dir!".to_string())
 }
 
 pub fn get_app_config_dir() -> Result<PathBuf, String> {
@@ -23,7 +23,7 @@ pub fn get_app_config_dir() -> Result<PathBuf, String> {
         config_dir.push(APP_NAME);
         return Ok(config_dir);
     }
-    return Err("cannot find config dir!".to_string());
+    Err("cannot find config dir!".to_string())
 }
 
 pub fn get_app_db_path() -> Result<PathBuf, String> {
@@ -39,12 +39,21 @@ pub fn get_app_config_path() -> Result<PathBuf, String> {
 }
 
 pub fn create_or_open_config_file() -> Result<File, String> {
+    let config_path = get_app_config_path()?;
+
+    // 首先检查文件是否存在，如果不存在则创建一个空文件
+    if !config_path.exists() {
+        let _file = File::create(&config_path).map_err(|e| e.to_string())?;
+        // 文件会自动关闭
+    }
+
+    // 然后以只读方式打开
     let file = OpenOptions::new()
-        .read(true) // 允许读取
-        .write(true) // 允许写入
-        .create(true) // 如果文件不存在，则创建它
-        .open(get_app_config_path()?)
-        .map_err(|e| e.to_string())?; // 打开文件
+        .read(true)
+        .write(false)
+        .open(config_path)
+        .map_err(|e| e.to_string())?;
+
     Ok(file)
 }
 

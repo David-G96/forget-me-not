@@ -1,6 +1,6 @@
 use std::str::FromStr;
 
-pub const HELP: &'static str =
+pub const HELP: &str =
     "Forget-me-not, a universal package recorder.\nusage: fmn <command> <option> [<args>]";
 
 pub fn print_help() {
