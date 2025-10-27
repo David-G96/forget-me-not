@@ -1,21 +1,36 @@
-use std::{cell::OnceCell, str::FromStr, sync::OnceLock};
+use std::str::FromStr;
 
-use crate::config::Config;
+use crate::{
+    config::Config,
+    simpledata::{self, data::SimplePackageData, sqlite},
+};
 use rusqlite::Connection;
 
 /// Program of forget-me-not, config and connection are both immutable once initialized
 #[derive(Debug)]
-pub struct Program {
-    connection: OnceLock<Connection>,
-    config: OnceLock<Config>,
+pub struct SimpleProgram {
+    connection: Connection,
+    config: Config,
 }
 
-impl Program {
-    /// init the config with the specific config str.
-    /// Will not reload the config if config already exists
-    pub fn init_config(&mut self, config_str: &str) -> Result<(), toml::de::Error> {
-        let config = Config::from_str(config_str)?;
-        self.config.get_or_init(|| config);
-        Ok(())
+impl SimpleProgram {
+    pub fn new(config_str: &str, conn: Connection) -> Result<Self, String> {
+        let config = Config::from_str(config_str).map_err(|e| e.to_string())?;
+        Ok(Self {
+            connection: conn,
+            config,
+        })
+    }
+
+    pub fn list_simple_data(&mut self) -> Result<Vec<SimplePackageData>, String> {
+        simpledata::sqlite::try_list_all(&mut self.connection)
+    }
+
+    pub fn init_db(&mut self) -> Result<(), String> {
+        simpledata::sqlite::try_create_table(&mut self.connection)
+    }
+
+    pub fn insert_package(&mut self, package: SimplePackageData) -> Result<usize, String> {
+        sqlite::try_insert(&mut self.connection, package)
     }
 }

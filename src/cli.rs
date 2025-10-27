@@ -1,4 +1,4 @@
-use std::{process::CommandArgs, str::FromStr};
+use std::str::FromStr;
 
 pub const HELP: &'static str =
     "Forget-me-not, a universal package recorder.\nusage: fmn <command> <option> [<args>]";

@@ -1,6 +1,6 @@
 use rusqlite::{Connection, params};
 
-use crate::simpledata::data::{self, SimplePackageData};
+use crate::simpledata::data::SimplePackageData;
 
 const PACKAGE_TABLE_NAME: &str = "Packages";
 
