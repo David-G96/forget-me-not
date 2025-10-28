@@ -1,12 +1,16 @@
 use std::str::FromStr;
 
-pub const HELP: &str =
-    "Forget-me-not, a universal package recorder.\nusage: fmn <command> <option> [<args>]\n
-    command:\n. ";
+pub const HELP: &str = r#"forget-me-not, a universal package recorder.
+Usage: fmn <command> <option> [<args>]
 
-pub fn print_help() {
-    eprintln!("{}", HELP);
-}
+Commands:
+  track  track a package
+  list   list all tracked package
+  help   show the help message
+"#;
+//     "Forget-me-not, a universal package recorder.\nusage: fmn <command> <option> [<args>]\n
+// commands:\n  track\t\ttrack a package\n\tlist\t\tlist all tracked packages\n
+// \thelp\t\tprint the help message";
 
 #[non_exhaustive]
 #[derive(Clone, Copy)]
