@@ -8,9 +8,6 @@ Commands:
   list   list all tracked package
   help   show the help message
 "#;
-//     "Forget-me-not, a universal package recorder.\nusage: fmn <command> <option> [<args>]\n
-// commands:\n  track\t\ttrack a package\n\tlist\t\tlist all tracked packages\n
-// \thelp\t\tprint the help message";
 
 #[non_exhaustive]
 #[derive(Clone, Copy)]
