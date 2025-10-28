@@ -1,2 +1,3 @@
 # forget-me-not
-A simple todo reminder.
+
+A simple reminder for multiple package managers.

@@ -1,8 +1,15 @@
+use chrono::{DateTime, Utc};
+use colored::Colorize;
 use std::str::FromStr;
 
 use crate::{
+    cli::Cli,
     config::Config,
-    simpledata::{self, data::SimplePackageData, sqlite},
+    simpledata::{
+        self,
+        data::{DisplayableSimpleDataVec, SimplePackageData},
+        sqlite::{self, try_insert},
+    },
 };
 use rusqlite::{Connection, params};
 
@@ -42,5 +49,47 @@ impl SimpleProgram {
 
     pub fn insert_package(&mut self, package: SimplePackageData) -> Result<usize, String> {
         sqlite::try_insert(&mut self.connection, package)
+    }
+
+    pub fn run(&mut self, cli: Cli) {
+        use crate::cli::CliCommand::*;
+        match cli.command() {
+            Track => {
+                if cli.args().len() < 2 {
+                    eprintln!("{}{}",
+                    "too less args for command: track\n".red(),
+                    "you need at least to provide the package name and source to track a package".blue() );
+                    return;
+                }
+                let name: &str = cli.args().first().unwrap();
+                let source: &str = cli.args().get(1).unwrap();
+                let description = cli.args().get(2);
+                let time_stamp = cli.args().get(3);
+                let package = SimplePackageData::new(
+                    name.to_string(),
+                    source.to_string(),
+                    description.map(|s| s.to_string()),
+                    time_stamp.map(|s| s.to_string()),
+                );
+
+                if let Err(msg) = self.insert_package(package) {
+                    eprintln!("failed to insert package. cause: {}", msg);
+                }
+            }
+            List => {
+                let result = self.list_simple_data();
+                match result {
+                    Ok(pkgs) => {
+                        println!("{}", DisplayableSimpleDataVec::from(&pkgs));
+                    }
+                    Err(e) => {
+                        eprint!("failed to list packages: {}", e);
+                    }
+                }
+            }
+            _ => {
+                eprintln!("{}", "unrecognized command".red());
+            }
+        }
     }
 }

@@ -7,6 +7,7 @@ pub fn print_help() {
     eprintln!("{}", HELP);
 }
 
+#[non_exhaustive]
 #[derive(Clone, Copy)]
 pub enum CliCommand {
     // track
@@ -53,7 +54,17 @@ pub struct Cli {
 impl Cli {
     pub fn parse() -> Self {
         let mut args = std::env::args();
-        let command: CliCommand = args.next().unwrap().parse().unwrap();
+        // 跳过程序名
+        args.next();
+        // 获取命令参数（如 "track" 或 "list"）
+        let command_str = args.next().unwrap_or_else(|| {
+            eprintln!("No command provided");
+            std::process::exit(1);
+        });
+        let command: CliCommand = command_str.parse().unwrap_or_else(|_| {
+            eprintln!("Unknown command: {}", command_str);
+            std::process::exit(1);
+        });
 
         let args: Vec<String> = args.collect();
         Self {

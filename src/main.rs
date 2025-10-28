@@ -1,9 +1,13 @@
 use std::{fs::File, io::Read, path::PathBuf, time::Instant};
 
-use chrono::DateTime;
+use chrono::{DateTime, Utc};
 use rusqlite::Connection;
 
-use crate::{program::SimpleProgram, simpledata::data::SimplePackageData};
+use crate::{
+    cli::Cli,
+    program::SimpleProgram,
+    simpledata::data::{DisplayableSimpleDataVec, SimplePackageData},
+};
 
 mod cli;
 mod config;
@@ -14,6 +18,8 @@ mod simpledata;
 
 pub fn main() {
     let start = Instant::now();
+    let cli = Cli::parse();
+
     let config_path = PathBuf::from("/Users/davidgao/Desktop/Workspace/forget-me-not/config.toml");
     let conn = Connection::open("/Users/davidgao/Desktop/Workspace/forget-me-not/package_data.db")
         .expect("unable to open sqlite db");
@@ -25,28 +31,10 @@ pub fn main() {
         .expect("unable to read from config");
 
     let config_str = String::from_utf8(buf).expect("config file includes non-utf8");
-    dbg!(&config_str);
 
     let mut program = SimpleProgram::new(&config_str, conn).expect("failed to parse config file");
-    program.clear_packages_table().unwrap();
-    dbg!(program.list_simple_data());
-    let pkg1 = SimplePackageData {
-        id: 0,
-        name: "pkg1".to_string(),
-        source: "wonderland".into(),
-        description: Some("a package from wonderland".to_string()),
-        installation: Some(chrono::Utc::now().to_string()),
-    };
 
-    program
-        .insert_package(pkg1)
-        .expect("failed to insert package ");
-
-    dbg!(program.list_simple_data());
-
-    program.clear_packages_table();
-
-    dbg!(program.list_simple_data());
+    program.run(cli);
 
     let end = Instant::now();
     println!("time elapsed: {:.2?}", end - start);
