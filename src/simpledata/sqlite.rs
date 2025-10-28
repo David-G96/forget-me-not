@@ -16,6 +16,8 @@ const QUERY_ALL_PACKAGE: &str = r#"SELECT * FROM Packages"#;
 
 const INSERT_PACKAGE: &str = r#"INSERT INTO Packages (Name, Source, Description, Installation) 
                                    VALUES (?1, ?2, ?3, ?4)"#;
+const DELETE_PACKAGES: &str = r#"DELETE FROM Packages"#;
+
 /// create table if not exists
 pub fn try_create_table(conn: &mut Connection) -> Result<(), String> {
     match conn.table_exists(None, PACKAGE_TABLE_NAME) {
@@ -85,4 +87,17 @@ pub fn try_insert(
         ],
     )
     .map_err(|e| e.to_string())
+}
+
+/// clear all packages
+pub fn try_clear_packages(conn: &mut Connection) -> Result<usize, String> {
+    conn.execute(DELETE_PACKAGES, params![])
+        .map_err(|e| e.to_string())
+}
+
+const DELETE_PACKAGE_BY_NAME: &str = r#"DELETE FROM Packages WHERE Name = ?1"#;
+
+pub fn try_delete_package_name(conn: &mut Connection, package_name: &str) -> Result<usize, String> {
+    conn.execute(DELETE_PACKAGE_BY_NAME, params![package_name])
+        .map_err(|e| e.to_string())
 }

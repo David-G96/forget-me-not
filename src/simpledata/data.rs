@@ -1,5 +1,3 @@
-use std::fmt::write;
-
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -48,18 +46,18 @@ impl std::fmt::Display for SimplePackageData {
 }
 
 #[derive(Debug)]
-pub struct DisplayableSimpleDataVec<'a>(&'a Vec<SimplePackageData>);
+pub struct LongDisplayableSimpleDataVec<'a>(&'a Vec<SimplePackageData>);
 
-impl<'a> From<&'a Vec<SimplePackageData>> for DisplayableSimpleDataVec<'a> {
+impl<'a> From<&'a Vec<SimplePackageData>> for LongDisplayableSimpleDataVec<'a> {
     fn from(value: &'a Vec<SimplePackageData>) -> Self {
         Self(&value)
     }
 }
 
-impl<'a> std::fmt::Display for DisplayableSimpleDataVec<'a> {
+impl<'a> std::fmt::Display for LongDisplayableSimpleDataVec<'a> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         for item in self.0.iter() {
-            write!(f, "{}\n", item)?;
+            write!(f, "{}\n\n", item)?;
         }
         Ok(())
     }

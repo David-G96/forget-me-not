@@ -1,28 +1,27 @@
-use chrono::{DateTime, Utc};
 use colored::Colorize;
 use std::str::FromStr;
 
 use crate::{
     cli::{self, Cli},
-    config::Config,
+    config::ManagerConfigs,
     simpledata::{
         self,
-        data::{DisplayableSimpleDataVec, SimplePackageData},
-        sqlite::{self, try_insert},
+        data::{LongDisplayableSimpleDataVec, SimplePackageData},
+        sqlite::{self},
     },
 };
 use rusqlite::{Connection, params};
 
 /// Program of forget-me-not, config and connection are both immutable once initialized
 #[derive(Debug)]
-pub struct SimpleProgram {
+pub struct SimpleApp {
     connection: Connection,
-    config: Config,
+    config: ManagerConfigs,
 }
 
-impl SimpleProgram {
+impl SimpleApp {
     pub fn new(config_str: &str, mut conn: Connection) -> Result<Self, String> {
-        let config = Config::from_str(config_str).map_err(|e| e.to_string())?;
+        let config = ManagerConfigs::from_str(config_str).map_err(|e| e.to_string())?;
         sqlite::try_create_table(&mut conn)?;
         Ok(Self {
             connection: conn,
@@ -31,12 +30,7 @@ impl SimpleProgram {
     }
 
     pub fn clear_packages_table(&mut self) -> Result<(), String> {
-        const DELETE_ALL: &str = "DELETE FROM Packages";
-
-        self.connection
-            .execute(DELETE_ALL, params![])
-            .map_err(|e| e.to_string())
-            .map(|_| ())
+        sqlite::try_clear_packages(&mut self.connection).map(|_| ())
     }
 
     pub fn list_simple_data(&mut self) -> Result<Vec<SimplePackageData>, String> {
@@ -80,7 +74,7 @@ impl SimpleProgram {
                 let result = self.list_simple_data();
                 match result {
                     Ok(pkgs) => {
-                        println!("{}", DisplayableSimpleDataVec::from(&pkgs));
+                        println!("{}", LongDisplayableSimpleDataVec::from(&pkgs));
                     }
                     Err(e) => {
                         eprint!("failed to list packages: {}", e);
