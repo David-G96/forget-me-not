@@ -65,6 +65,27 @@ impl FromStr for ManagerConfigs {
     }
 }
 
+impl Default for ManagerConfigs {
+    fn default() -> Self {
+        let mut manager = HashMap::new();
+        manager.insert(
+            "brew".to_string(),
+            SingleManagerConfig {
+                install: Command::Template(TemplateCommand {
+                    template: "install {package_name}".to_string(),
+                }),
+                upgrade: Command::Template(TemplateCommand {
+                    template: "upgrade {package_name}".to_string(),
+                }),
+                remove: Command::Template(TemplateCommand {
+                    template: "remove {package_name".to_string(),
+                }),
+            },
+        );
+        Self { manager }
+    }
+}
+
 #[cfg(test)]
 mod test {
     use super::*;

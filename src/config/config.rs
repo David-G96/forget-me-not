@@ -1,11 +1,10 @@
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
 
-use crate::config::manager::SingleManagerConfig;
-use std::collections::HashMap;
+use crate::config::ManagerConfigs;
 
 #[derive(Debug, Deserialize)]
 pub struct Config {
-    manager: HashMap<String, SingleManagerConfig>,
+    manager: ManagerConfigs,
 }
 
 #[cfg(test)]

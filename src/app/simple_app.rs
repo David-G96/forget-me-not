@@ -10,7 +10,7 @@ use crate::{
         sqlite::{self},
     },
 };
-use rusqlite::{Connection, params};
+use rusqlite::Connection;
 
 /// Program of forget-me-not, config and connection are both immutable once initialized
 #[derive(Debug)]
