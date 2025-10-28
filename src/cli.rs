@@ -1,7 +1,8 @@
 use std::str::FromStr;
 
 pub const HELP: &str =
-    "Forget-me-not, a universal package recorder.\nusage: fmn <command> <option> [<args>]";
+    "Forget-me-not, a universal package recorder.\nusage: fmn <command> <option> [<args>]\n
+    command:\n. ";
 
 pub fn print_help() {
     eprintln!("{}", HELP);
@@ -14,6 +15,8 @@ pub enum CliCommand {
     Track,
     // list
     List,
+    // help
+    Help,
 }
 
 impl FromStr for CliCommand {
@@ -22,6 +25,7 @@ impl FromStr for CliCommand {
         match s {
             "track" => Ok(Self::Track),
             "list" => Ok(Self::List),
+            "help" => Ok(Self::Help),
             s => Err(format!("Cannot parse command `{}`", s)),
         }
     }

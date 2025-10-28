@@ -3,7 +3,7 @@ use colored::Colorize;
 use std::str::FromStr;
 
 use crate::{
-    cli::Cli,
+    cli::{self, Cli},
     config::Config,
     simpledata::{
         self,
@@ -86,6 +86,9 @@ impl SimpleProgram {
                         eprint!("failed to list packages: {}", e);
                     }
                 }
+            }
+            Help => {
+                println!("{}", cli::HELP);
             }
             _ => {
                 eprintln!("{}", "unrecognized command".red());
