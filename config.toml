@@ -1,9 +1,0 @@
-[manager.apt]
-install = "install"
-upgrade = { template = "upgrade -y" }
-remove = "remove"
-
-[manager.flatpak]
-install = { template = "install --user {package_name} --assumeyes" }
-upgrade = "update"
-remove = "remove"
