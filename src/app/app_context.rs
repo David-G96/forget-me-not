@@ -1,8 +1,9 @@
 use rusqlite::Connection;
 use std::sync::{Arc, Mutex};
 
-use crate::{app::app_result::AppResult, config::config::Config};
+use crate::config::config::Config;
 
+/// the essential context of an app
 #[derive(Debug)]
 struct AppContext {
     config: Config,

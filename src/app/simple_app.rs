@@ -34,11 +34,11 @@ impl SimpleApp {
     }
 
     pub fn list_simple_data(&mut self) -> Result<Vec<SimplePackageData>, String> {
-        simpledata::sqlite::try_list_all(&mut self.connection)
+        sqlite::try_list_all(&mut self.connection)
     }
 
     pub fn init_db(&mut self) -> Result<(), String> {
-        simpledata::sqlite::try_create_table(&mut self.connection)
+        sqlite::try_create_table(&mut self.connection)
     }
 
     pub fn insert_package(&mut self, package: SimplePackageData) -> Result<usize, String> {
