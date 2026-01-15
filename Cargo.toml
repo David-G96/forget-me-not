@@ -2,14 +2,18 @@
 name = "forget-me-not"
 version = "0.1.0"
 edition = "2024"
+description = "a simple package recorder"
 
 [dependencies]
 chrono = { version = "0.4.41", features = ["serde", "now"] }
+clap = { version = "4.5.54", features = ["derive"] }
 color-eyre = "0.6.5"
 colored = "3.0.0"
 dirs = "6.0.0"
 rusqlite = { version = "0.37.0", features = ["bundled"] }
+semver = {version = "1.0.27", features = ["serde"]}
 serde = { version = "1.0.219", features = ["derive"] }
+serde_json = "1.0.149"
 sled = "0.34.7"
 toml = "0.9.5"
 which = "8.0.0"
