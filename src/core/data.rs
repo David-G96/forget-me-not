@@ -1,8 +1,13 @@
-use std::path::PathBuf;
-
 use chrono::{DateTime, Utc};
+use color_eyre::{Result as Res, eyre::ensure};
 use semver::Version;
 use serde::{Deserialize, Serialize};
+use std::{
+    cell::{LazyCell, OnceCell},
+    collections::HashMap,
+    fs::{File, read_to_string},
+    path::{self, Path, PathBuf},
+};
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub enum FlexibleVersion {
@@ -57,9 +62,70 @@ impl RecordData {
     }
 }
 
+#[derive(Debug, Default)]
+pub struct DataBase {
+    pub data: HashMap<u32, RecordData>,
+}
+
+impl DataBase {
+    pub fn from_vec(data: Vec<RecordData>) -> Self {
+        let mut map = HashMap::new();
+        for d in data {
+            map.insert(d.id, d);
+        }
+        Self { data: map }
+    }
+
+    pub fn from_json_db(path: &Path) -> Res<Self> {
+        ensure!(path.exists(), "path does not exist");
+        let db_file = read_to_string(path)?;
+        let data: Vec<RecordData> = serde_json::from_str(&db_file)?;
+        Ok(Self::from_vec(data))
+    }
+}
+
+#[derive(Debug)]
+pub struct DataManager {
+    pub db: Res<DataBase>,
+    pub staged: DataBase,
+}
+
+impl DataManager {
+    pub fn new(path: &Path) -> Self {
+        Self {
+            db: DataBase::from_json_db(path),
+            staged: DataBase::default(),
+        }
+    }
+}
+
 #[cfg(test)]
 mod test {
     use super::*;
+
+    #[test]
+    fn test_db_de() -> Res<()> {
+        let str = r#"{
+  "id": 0,
+  "name": "pkg1",
+  "version": {
+    "Sematic": "1.21.0"
+  },
+  "installationDate": "2026-01-17T00:17:23.283758Z",
+  "location": "/a/b/c",
+  "source": "org.wonderland",
+  "tags": [
+    "wtf",
+    "rusty",
+    "foo",
+    "bar"
+  ],
+  "description": "What is this? I don't know."
+}"#;
+
+        let d: Vec<RecordData> = serde_json::from_str(str)?;
+        Ok(())
+    }
 
     #[test]
     fn test_record_data_ser() {

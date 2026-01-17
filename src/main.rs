@@ -33,6 +33,8 @@
 //     println!("time elapsed: {:.2?}", end - start);
 // }
 
+use std::env;
+
 use clap::Parser;
 
 use crate::core::cli::Cli;
@@ -40,5 +42,8 @@ use crate::core::cli::Cli;
 mod core;
 
 fn main() {
-    let cli = Cli::parse();
+    let args = env::args();
+    println!("args:{:?}", args);
+
+    let _cli = Cli::parse();
 }

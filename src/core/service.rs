@@ -29,6 +29,4 @@ impl Manager {
         }
         Self { index }
     }
-
-            
 }

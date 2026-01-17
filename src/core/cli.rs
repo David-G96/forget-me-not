@@ -1,17 +1,31 @@
-use std::ffi::OsStr;
-use std::ffi::OsString;
-use std::path::PathBuf;
 
-use clap::{Args, Parser, Subcommand, ValueEnum};
+use clap::{Parser, Subcommand};
 
 /// A fictional versioning CLI
-#[derive(Debug, Parser)] // requires `derive` feature
+#[derive(Debug, Parser, PartialEq, Eq)] // requires `derive` feature
 pub struct Cli {
     #[command(subcommand)]
     command: Commands,
 }
 
-#[derive(Debug, Subcommand)]
+#[derive(Debug, Subcommand, PartialEq, Eq)]
 pub enum Commands {
     Record { name: String },
+    Install { name: String, source: String },
+}
+
+#[cfg(test)]
+mod test {
+
+    use super::*;
+
+    #[test]
+    fn test_cli() {
+        let cli = Cli::parse_from(vec!["target/debug/forget-me-not", "record", "abc"]);
+        let expected = Cli {
+            command: Commands::Record { name: "abc".into() },
+        };
+
+        assert_eq!(expected, cli);
+    }
 }
